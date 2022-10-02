@@ -1,11 +1,11 @@
 // JIT-JSS.cpp : Este arquivo contém a função 'main'. A execução do programa começa e termina ali.
 //
 
-#include <iostream>
+#include "JSSinst.h"
 
 int main()
 {
-    std::cout << "Hello World!\n";
+    teste();
 }
 
 // Executar programa: Ctrl + F5 ou Menu Depurar > Iniciar Sem Depuração
