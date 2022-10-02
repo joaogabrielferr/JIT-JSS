@@ -1,6 +1,6 @@
-.vs
-.x64
+.vs/
+.x64/
 JIT-JSS.sln
 JIT-JSS.vcxproj
-JIT-JSS.vcxproj.filter
+JIT-JSS.vcxproj.filters
 JIT-JSS.vcxproj.user
