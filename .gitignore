@@ -1,6 +1,2 @@
-.vs/
-.x64/
-JIT-JSS.sln
-JIT-JSS.vcxproj
-JIT-JSS.vcxproj.filters
-JIT-JSS.vcxproj.user
+.vscode
+.vs
