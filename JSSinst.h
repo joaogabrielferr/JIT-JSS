@@ -5,59 +5,47 @@
 #include<vector>
 #include<sstream>
 #include<fstream>
+#include<algorithm>
+#include<stack>
+#include <map>
 
 using namespace std;
 
 
-#define sequence vector<vector<Operation> >
+#define matriz vector<vector<int> >
 
-class Operation {
-	
-	public:
-	int id, machine, processingTime, dueDate,job;
-	double earliness, tardiness;
-	
-	int startTime;
-	int completionTime;
+class JIT_JSS {
 
-	Operation() {};
-	Operation(int id) {};
-	Operation(int j,int m, int p, int d, double e, double t, int id)
-	{
-		this->job = j;
-		this->machine = m;
-		this->processingTime = p;
-		this->dueDate = d;
-		this->earliness = e;
-		this->tardiness = t;
-		this->id = id;
-
-	}
-
-	void print(int i){
-		if(i == 1)cout<<this->machine<<" "<<this->processingTime<<" "<<this->dueDate<<" "<<this->earliness<<" "<<this->tardiness<<" id:"<<this->id<<endl;
-		else if(i == 0) cout<<this->machine<<" "<<this->processingTime<<" "<<this->dueDate<<" "<<this->earliness<<" "<<this->tardiness<<" id:"<<this->id<<"    ";
-		else cout<<"("<<this->id<<") O"<<this->job<<this->machine<<" startTime:"<<this->startTime<<",proc:"<<this->processingTime<<",comp:"<<this->completionTime<<endl;
-	}
-};
-
-class JSSinst {
+//operations start from 1
+//jobs and machines start  from 0 (the machines are 0-indexed in the instances of Baptiste et. al(2008))
 	
 public:
 	//number of jobs in the instance
 	int nJobs;
 	//number of machines in the instance
 	int nMachines;
-
-	//the processing order of the operations
-	sequence processingOrder;
-	//feasible schedule for the instance
-	sequence schedule;
-	//start time of all operations
-	vector< vector<int> > startTimes;
-
-	// OpToJob[i] = job of operation i
-	vector<int>OpTojob;
+	//number of operations
+	int nOperations;
+	//processingTime[i] = processing time of operation i
+	vector<int>processingTime;
+	//duedDate[i] = due date of operation i
+	vector<int>dueDate;
+	//earliness[i] = earliness penalty of operation i
+	vector<double>earliness;
+	//tardiness[i] = tardiness penalty of operation i
+	vector<double>tardiness;
+	//job[i] = job of operation i (job index starts from 0)
+	vector<int>job;
+	//machine[i] = machine of job i (machine index starts from 0)
+	vector<int>machine;
+	//startTime[i] = start time of operation i in the main schedule
+	vector<int> startTime;
+	//jobOps[i] = operations of job i
+	matriz jobOps;
+	//machineOps[i] = operations of machine i
+	matriz machineOps;
+	//processingOrder[i] = processing order of job i
+	matriz processingOrder;
 
 
 vector<double>
@@ -66,30 +54,55 @@ readLine(string line);
 void
 parseInstance(string path);
 
-sequence
-EarliestDeadlineFirst(sequence instance);
+matriz
+EarliestDeadlineFirst(matriz instance);
 
-sequence
-GifflerThompson(sequence instance);
+matriz
+GifflerThompson(matriz instance);
 
 //output[0] = total penalties,output[1] = total earliness,output[2] = total tardiness
 vector<double>
-SchedulePenalties(sequence schedule);
+SchedulePenalties(matriz schedule,vector<int>scheduleStartTimes);
 
-vector < sequence >
-Swap(sequence schedule);
+bool
+isScheduleCorrect(matriz s,vector<int> neighborStartTime);
 
-sequence
-LocalSearch(sequence instance,int MAX_ITER);
+bool
+isProcessingOrderKept(matriz schedule,vector<int>scheduleStartTime);
 
-vector<Operation>
-CriticalPath(sequence schedule);
+//vector < pair < sequence , startTimes > >
+vector<pair<matriz,vector<int> > >
+Swap(matriz schedule);
 
-vector< sequence >
-N7(sequence schedule);
+// pair <sequence , iterations >
+pair<matriz,int>
+LocalSearch(matriz instance,int MAX_ITER);
 
-sequence
-TabuSearch(sequence instance, int MAX_ITER, int TABU_TENURE);
+
+vector<int>
+CriticalPath(matriz schedule);
+
+void
+TopologicalSort(int v,vector<bool>&visited,stack<int>&Stack,vector< vector<int> >&g);
+
+vector< vector<int> >
+CriticalBlocks(vector<int> criticalPath);
+
+vector< pair<matriz,vector<int> > >
+N7(matriz schedule);
+
+pair<matriz,vector<int> >
+insertion1(matriz schedule, int block_op,int block_first_op);
+
+
+pair<matriz,vector<int> >
+insertion2(matriz schedule,int block_op, int block_first_op);
+
+pair<matriz,vector<int> >
+insertion3(matriz schedule,int prev_op,int block_op);
+
+matriz
+TabuSearch(matriz instance, int MAX_ITER, int TABU_TENURE);
 
 };
 

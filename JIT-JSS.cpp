@@ -1,57 +1,79 @@
-// JIT-JSS.cpp : Este arquivo contém a função 'main'. A execução do programa começa e termina ali.
+// JIT-jit.cpp : Este arquivo contém a função 'main'. A execução do programa começa e termina ali.
 //
 
-#include "JSSinst.h"
+#include "jssinst.h"
+
 
 int main()
 {
-    JSSinst jss;
-    pair<sequence, pair<int, int> >r;
-    jss.parseInstance("instance.txt");
-    
+    JIT_JSS jit;
+    jit.parseInstance("instance.txt");
+   
+    matriz schedule = jit.EarliestDeadlineFirst(jit.processingOrder);
 
-    double best = 10000000.0;
-    sequence schedule;
-    for(int i = 0;i<500;i++)
-    {
-        sequence s = jss.GifflerThompson(jss.processingOrder);
-        vector<double> results = jss.SchedulePenalties(s);
-        if(results[0] < best)
-        {
-            best = results[0];
-            schedule = s;
-        }
-    }
-
-    // sequence schedule = jss.EarliestDeadlineFirst(jss.processingOrder);
-    cout<<schedule.size()<<endl;
-    cout<<"SCHEDULE:\n";
+     cout<<"schedule:\n";
     for(int i = 0;i<schedule.size();i++)
     {
         cout<<"M"<<i<<":\n";
         for(int j = 0;j<schedule[i].size();j++)
         {
-            schedule[i][j].print(2);
+            cout<<"O"<<jit.job[schedule[i][j]] + 1<<jit.machine[schedule[i][j]]<<" ";
+            cout<<jit.machine[schedule[i][j]]<<" ";
+            cout<<jit.processingTime[schedule[i][j]]<<' ';
+            cout<<jit.dueDate[schedule[i][j]]<<' ';
+            cout<<jit.earliness[schedule[i][j]]<<' ';
+            cout<<jit.tardiness[schedule[i][j]]<<' ';
+            cout<<" start:"<<jit.startTime[schedule[i][j]]<<',';
+            cout<<" completion:"<<jit.startTime[schedule[i][j]] + jit.processingTime[schedule[i][j]]<<" ";
+            cout<<"   id:"<<schedule[i][j]<<endl;
         }
-        cout<<endl;
     }
+    // vector<int> criticalPath = jit.CriticalPath(schedule);
+
+    // vector< vector<int> >blocks = jit.CriticalBlocks(criticalPath);
+
+    // for(vector<int> v : blocks)
+    // {
+    //     cout<<"block:\n";
+    //     for(int i : v)cout<<i<<" ";
+    //     cout<<endl;
+    // }
+
+    	vector< pair<matriz,vector<int> > > neighborhood = jit.N7(schedule);
 
 
-    cout<<"penalties:"<<best<<endl;
+    return 0;
 
-    
+    // pair<matriz,int> r = jit.LocalSearch(jit.processingOrder,500);
+    // matriz schedule = r.first;
+
+    // // matriz schedule = jit.EarliestDeadlineFirst(jit.processingOrder);
+
+    // cout<<"schedule:\n";
+    // for(int i = 0;i<schedule.size();i++)
+    // {
+    //     cout<<"M"<<i<<":\n";
+    //     for(int j = 0;j<schedule[i].size();j++)
+    //     {
+    //         cout<<"O"<<jit.job[schedule[i][j]] + 1<<jit.machine[schedule[i][j]]<<" ";
+    //         cout<<jit.machine[schedule[i][j]]<<" ";
+    //         cout<<jit.processingTime[schedule[i][j]]<<' ';
+    //         cout<<jit.dueDate[schedule[i][j]]<<' ';
+    //         cout<<jit.earliness[schedule[i][j]]<<' ';
+    //         cout<<jit.tardiness[schedule[i][j]]<<' ';
+    //         cout<<" start:"<<jit.startTime[schedule[i][j]]<<',';
+    //         cout<<" completion:"<<jit.startTime[schedule[i][j]] + jit.processingTime[schedule[i][j]]<<" ";
+    //         cout<<"   id:"<<schedule[i][j]<<endl;
+    //     }
+    // }
+    // auto r2 = jit.SchedulePenalties(schedule,jit.startTime);
+    // // cout<<"penalidades inital:"<<r2[0]<<endl;
+    // cout<<"penalidades :"<<r2[0]<<endl;
+    // cout<<"iterations:"<<r.second<<endl;
+
+    // jit.CriticalPath(schedule);
 
 
+    // //vector< pair<matriz,vector<int> > > n = jit.Swap(schedule);
 
 }
-
-// Executar programa: Ctrl + F5 ou Menu Depurar > Iniciar Sem Depuração
-// Depurar programa: F5 ou menu Depurar > Iniciar Depuração
-
-// Dicas para Começar: 
-//   1. Use a janela do Gerenciador de Soluções para adicionar/gerenciar arquivos
-//   2. Use a janela do Team Explorer para conectar-se ao controle do código-fonte
-//   3. Use a janela de Saída para ver mensagens de saída do build e outras mensagens
-//   4. Use a janela Lista de Erros para exibir erros
-//   5. Ir Para o Projeto > Adicionar Novo Item para criar novos arquivos de código, ou Projeto > Adicionar Item Existente para adicionar arquivos de código existentes ao projeto
-//   6. No futuro, para abrir este projeto novamente, vá para Arquivo > Abrir > Projeto e selecione o arquivo. sln
