@@ -9,8 +9,9 @@ int main()
     JIT_JSS jit;
     jit.parseInstance("instance.txt");
    
-    matriz schedule = jit.EarliestDeadlineFirst(jit.processingOrder);
+    matriz schedule = jit.TabuSearch(jit.processingOrder,500,8);
 
+    
      cout<<"schedule:\n";
     for(int i = 0;i<schedule.size();i++)
     {
@@ -28,20 +29,10 @@ int main()
             cout<<"   id:"<<schedule[i][j]<<endl;
         }
     }
-    // vector<int> criticalPath = jit.CriticalPath(schedule);
 
-    // vector< vector<int> >blocks = jit.CriticalBlocks(criticalPath);
-
-    // for(vector<int> v : blocks)
-    // {
-    //     cout<<"block:\n";
-    //     for(int i : v)cout<<i<<" ";
-    //     cout<<endl;
-    // }
-
-    	vector< pair<matriz,vector<int> > > neighborhood = jit.N7(schedule);
-
-
+    cout<<"penalidades:";
+    vector<double>v = jit.SchedulePenalties(schedule,jit.startTime);
+    cout<<v[0];
     return 0;
 
     // pair<matriz,int> r = jit.LocalSearch(jit.processingOrder,500);

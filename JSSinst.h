@@ -14,6 +14,8 @@ using namespace std;
 
 #define matriz vector<vector<int> >
 
+#define Neighbor pair< pair<matriz, vector<int> >, vector<int> >
+
 class JIT_JSS {
 
 //operations start from 1
@@ -88,18 +90,21 @@ TopologicalSort(int v,vector<bool>&visited,stack<int>&Stack,vector< vector<int> 
 vector< vector<int> >
 CriticalBlocks(vector<int> criticalPath);
 
-vector< pair<matriz,vector<int> > >
-N7(matriz schedule);
+vector<Neighbor>
+N7(matriz schedule,vector<int> scheduleStartTimes);
 
 pair<matriz,vector<int> >
-insertion1(matriz schedule, int block_op,int block_first_op);
+insertion1(matriz schedule, int block_op,int block_first_op, vector<int> scheduleStartTimes);
 
 
 pair<matriz,vector<int> >
-insertion2(matriz schedule,int block_op, int block_first_op);
+insertion2(matriz schedule,int block_op, int block_first_op, vector<int> scheduleStartTimes);
 
 pair<matriz,vector<int> >
-insertion3(matriz schedule,int prev_op,int block_op);
+insertion3(matriz schedule,int prev_op,int block_op, vector<int> scheduleStartTimes);
+
+pair<matriz,vector<int> >
+insertion4(matriz schedule,int next_op,int block_op, vector<int> scheduleStartTimes);
 
 matriz
 TabuSearch(matriz instance, int MAX_ITER, int TABU_TENURE);
