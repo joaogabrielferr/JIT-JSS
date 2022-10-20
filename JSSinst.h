@@ -11,10 +11,14 @@
 
 using namespace std;
 
-
+//matriz: sequence of ops in the machines
 #define matriz vector<vector<int> >
 
-#define Neighbor pair< pair<matriz, vector<int> >, vector<int> >
+//Schedule: sequence of ops in the machines + start times
+#define Schedule pair<matriz,vector<int> >
+
+//Neighbor: Schedule + move that created the neighbor
+#define Neighbor pair< Schedule, vector<int> >
 
 class JIT_JSS {
 
@@ -40,8 +44,6 @@ public:
 	vector<int>job;
 	//machine[i] = machine of job i (machine index starts from 0)
 	vector<int>machine;
-	//startTime[i] = start time of operation i in the main schedule
-	vector<int> startTime;
 	//jobOps[i] = operations of job i
 	matriz jobOps;
 	//machineOps[i] = operations of machine i
@@ -56,7 +58,7 @@ readLine(string line);
 void
 parseInstance(string path);
 
-matriz
+Schedule
 EarliestDeadlineFirst(matriz instance);
 
 matriz
@@ -66,15 +68,21 @@ GifflerThompson(matriz instance);
 vector<double>
 SchedulePenalties(matriz schedule,vector<int>scheduleStartTimes);
 
+//check if there is two ops from the same job being executed at the same time
 bool
 isScheduleCorrect(matriz s,vector<int> neighborStartTime);
 
+//check if the processing order of the jobs are manteined in the scheduled found
 bool
 isProcessingOrderKept(matriz schedule,vector<int>scheduleStartTime);
 
+//check if the start times are correct i.e if the start time of a op is >= the start time of its predecessor
+bool
+isSequenceCorrect(matriz schedule,vector<int>scheduleStartTime);
+
 //vector < pair < sequence , startTimes > >
-vector<pair<matriz,vector<int> > >
-Swap(matriz schedule);
+vector<Neighbor>
+Swap(matriz schedule,vector<int> startTimes);
 
 // pair <sequence , iterations >
 pair<matriz,int>
@@ -90,15 +98,21 @@ TopologicalSort(int v,vector<bool>&visited,stack<int>&Stack,vector< vector<int> 
 vector< vector<int> >
 CriticalBlocks(vector<int> criticalPath);
 
+pair<vector<int>,vector<int> >
+SwapAdj(vector<int>sequence,vector<int>stimes,int op1,int op2);
+
 vector<Neighbor>
 N7(matriz schedule,vector<int> scheduleStartTimes);
 
+vector<Neighbor>
+N5(matriz schedule,vector<int> scheduleStartTimes);
+
 pair<matriz,vector<int> >
-insertion1(matriz schedule, int block_op,int block_first_op, vector<int> scheduleStartTimes);
+insertion1(matriz schedule, int block_op,int block_first_op, vector<int> scheduleStartTimes,int z);
 
 
 pair<matriz,vector<int> >
-insertion2(matriz schedule,int block_op, int block_first_op, vector<int> scheduleStartTimes);
+insertion2(matriz schedule,int block_op,int last_op, vector<int> scheduleStartTimes);
 
 pair<matriz,vector<int> >
 insertion3(matriz schedule,int prev_op,int block_op, vector<int> scheduleStartTimes);
@@ -106,7 +120,7 @@ insertion3(matriz schedule,int prev_op,int block_op, vector<int> scheduleStartTi
 pair<matriz,vector<int> >
 insertion4(matriz schedule,int next_op,int block_op, vector<int> scheduleStartTimes);
 
-matriz
+Schedule
 TabuSearch(matriz instance, int MAX_ITER, int TABU_TENURE);
 
 };

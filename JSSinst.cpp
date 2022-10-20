@@ -56,7 +56,6 @@ JIT_JSS::parseInstance(string path)
 	tardiness.resize(nOperations + 1);
 	job.resize(nOperations + 1);
 	machine.resize(nOperations + 1);
-	startTime.resize(nOperations + 1);
 	
 	//machine and job start from 0
 	jobOps.resize(nJobs);
@@ -130,114 +129,116 @@ JIT_JSS::SchedulePenalties(matriz s,vector<int>scheduleStartTimes)
 
 // /////////////////////////////////////////////////////////////////////////////////////////
 
-matriz
-JIT_JSS::GifflerThompson(matriz instance)
-{
-	//instance = processing orders
+// matriz
+// JIT_JSS::GifflerThompson(matriz instance)
+// {
+// 	//instance = processing orders
 	
-	matriz schedule;
-	schedule.resize(nMachines);
+// 	matriz schedule;
+// 	schedule.resize(nMachines);
 
-	vector<int>G;
-	vector<int>machineStart(nMachines,0),jobStart(nJobs,0);
+// 	vector<int>G;
+// 	vector<int>machineStart(nMachines,0),jobStart(nJobs,0);
 
-	//add all the schedulable operations, i.e., the first operation of each job and
-	//initialize the earliest start and completion times for the operations in G
+// 	//add all the schedulable operations, i.e., the first operation of each job and
+// 	//initialize the earliest start and completion times for the operations in G
 	
-	for(int i = 0;i<nJobs;i++)
-	{
-		int op = instance[i][0];
-		startTime[op] = 0;
-		G.push_back(op);
-	}
+// 	for(int i = 0;i<nJobs;i++)
+// 	{
+// 		int op = instance[i][0];
+// 		startTime[op] = 0;
+// 		G.push_back(op);
+// 	}
 
-	while(!G.empty())
-	{
-		//Find the earliest completion time C∗ and its associated machine M∗ among all the operations in G
-		int Cstar = INT_MAX;
-		int Mstar;
+// 	while(!G.empty())
+// 	{
+// 		//Find the earliest completion time C∗ and its associated machine M∗ among all the operations in G
+// 		int Cstar = INT_MAX;
+// 		int Mstar;
 
-		for(int op : G)
-		{
-			if(startTime[op] + processingTime[op] < Cstar)
-			{
-				Cstar = startTime[op] + processingTime[op];
-				Mstar = machine[op];
-			}
-		}
-		//let G0 ⊆ G denote the operations processed on machine M∗;
-		vector<int>G0;
-		for(int op : G)
-		{
-			if(machine[op] == Mstar)G0.push_back(op);
-		}
-		//G1 = {Op ∈ G0|op.startTime < C∗} (building the conflict set);
-		vector<int>G1;
-		for(int op : G0)
-		{
-			if(startTime[op] < Cstar)G1.push_back(op);
-		}	
+// 		for(int op : G)
+// 		{
+// 			if(startTime[op] + processingTime[op] < Cstar)
+// 			{
+// 				Cstar = startTime[op] + processingTime[op];
+// 				Mstar = machine[op];
+// 			}
+// 		}
+// 		//let G0 ⊆ G denote the operations processed on machine M∗;
+// 		vector<int>G0;
+// 		for(int op : G)
+// 		{
+// 			if(machine[op] == Mstar)G0.push_back(op);
+// 		}
+// 		//G1 = {Op ∈ G0|op.startTime < C∗} (building the conflict set);
+// 		vector<int>G1;
+// 		for(int op : G0)
+// 		{
+// 			if(startTime[op] < Cstar)G1.push_back(op);
+// 		}	
 
-		//Select op ∈ G1 to be scheduled next (by randomly picking a op in G1)
-		//Select op ∈ G1 to be scheduled next (by using earliest due date dispatching rule)
-		int selected = G1[0];
-		for(int i = 1;i<G1.size();i++)
-		{
-			if(dueDate[G1[i]] < dueDate[selected])
-			{
-				selected = G1[i];
-			}
-		}
+// 		//Select op ∈ G1 to be scheduled next (by randomly picking a op in G1)
+// 		//Select op ∈ G1 to be scheduled next (by using earliest due date dispatching rule)
+// 		int selected = G1[0];
+// 		for(int i = 1;i<G1.size();i++)
+// 		{
+// 			if(dueDate[G1[i]] < dueDate[selected])
+// 			{
+// 				selected = G1[i];
+// 			}
+// 		}
 
-		//schedule selected op
-		schedule[Mstar].push_back(selected);
+// 		//schedule selected op
+// 		schedule[Mstar].push_back(selected);
 
-		startTime[selected] = max(machineStart[Mstar],jobStart[job[selected]]);
+// 		startTime[selected] = max(machineStart[Mstar],jobStart[job[selected]]);
 
-		machineStart[Mstar] = startTime[selected] + processingTime[selected];
-		jobStart[job[selected]] = startTime[selected] + processingTime[selected];
+// 		machineStart[Mstar] = startTime[selected] + processingTime[selected];
+// 		jobStart[job[selected]] = startTime[selected] + processingTime[selected];
 
-		//Remove op from G and add its job successor (if any) to G;
-		int selectedId = 0;
-		for(int i = 0;i<G.size();i++)
-		{
-			if(selected == G[i])
-			{
-				selectedId = i;
-			}
-		}
+// 		//Remove op from G and add its job successor (if any) to G;
+// 		int selectedId = 0;
+// 		for(int i = 0;i<G.size();i++)
+// 		{
+// 			if(selected == G[i])
+// 			{
+// 				selectedId = i;
+// 			}
+// 		}
 
-		G[selectedId] = G[G.size() - 1];
-		G.pop_back();
+// 		G[selectedId] = G[G.size() - 1];
+// 		G.pop_back();
 
-		int selectedJob = job[selected];
+// 		int selectedJob = job[selected];
 
-		for(int i = 0;i<jobOps[selectedJob].size() - 1;i++)
-		{
-			if(jobOps[selectedJob][i] == selected)
-			{
-				int next = jobOps[selectedJob][i + 1];
-				startTime[next] = max(machineStart[machine[next]],jobStart[job[next]]);
-				G.push_back(next);
-			}
-		}
+// 		for(int i = 0;i<jobOps[selectedJob].size() - 1;i++)
+// 		{
+// 			if(jobOps[selectedJob][i] == selected)
+// 			{
+// 				int next = jobOps[selectedJob][i + 1];
+// 				startTime[next] = max(machineStart[machine[next]],jobStart[job[next]]);
+// 				G.push_back(next);
+// 			}
+// 		}
 
-		//update start times for operations in G
-		for(int op : G)
-		{
-			startTime[op] = (startTime[op] < max(machineStart[machine[op]],jobStart[job[op]]) ? max(machineStart[machine[op]],jobStart[job[op]]) : 0);
-		}
-	}
+// 		//update start times for operations in G
+// 		for(int op : G)
+// 		{
+// 			startTime[op] = (startTime[op] < max(machineStart[machine[op]],jobStart[job[op]]) ? max(machineStart[machine[op]],jobStart[job[op]]) : 0);
+// 		}
+// 	}
 
-	return schedule;
+// 	return schedule;
 	
-}
+// }
 
-matriz
+Schedule
 JIT_JSS::EarliestDeadlineFirst(matriz instance)
 {
 	matriz schedule;
+	vector<int>startTime;
 	schedule.resize(nMachines);
+	startTime.resize(nOperations + 1);
 
 	vector<int>ready;
 	vector<int>machineStart(nMachines,0),jobStart(nJobs,0);
@@ -281,7 +282,7 @@ JIT_JSS::EarliestDeadlineFirst(matriz instance)
 
 	}
 
-	return schedule;
+	return {schedule,startTime};
 
 }
 
@@ -326,6 +327,22 @@ JIT_JSS::isScheduleCorrect(matriz s,vector<int> neighborStartTime)
 }
 
 bool
+JIT_JSS::isSequenceCorrect(matriz schedule,vector<int>scheduleStartTime)
+{
+	for(int i = 0;i<schedule.size();i++)
+	{
+		for(int j = 1;j<schedule[i].size();j++)
+		{
+			int op1starttime = scheduleStartTime[schedule[i][j - 1]];
+			int op1proctime = processingTime[schedule[i][j - 1]];
+			int op2starttime = scheduleStartTime[schedule[i][j]];
+			if(op2starttime < op1starttime + op1proctime)return false;
+		}
+	}
+	return true;
+}
+
+bool
 JIT_JSS::isProcessingOrderKept(matriz schedule,vector<int>scheduleStartTime)
 {
 	matriz scheduleOrder(nJobs);
@@ -358,103 +375,84 @@ JIT_JSS::isProcessingOrderKept(matriz schedule,vector<int>scheduleStartTime)
 }
 
 
-vector<pair<matriz,vector<int> > >
-JIT_JSS::Swap(matriz schedule)
-{
+// vector<pair<matriz,vector<int> > >
+// JIT_JSS::Swap(matriz schedule)
+// {
 
-		//{schedule,startTime}
-		vector<pair<matriz,vector<int> > >neighborhood;
+// 		//{schedule,startTime}
+// 		vector<pair<matriz,vector<int> > >neighborhood;
 
-		for(int i = 0;i<schedule.size();i++)
-		{
-			for(int j = 1;j<schedule[i].size();j++)
-			{
-				matriz neighbor = schedule;
-				vector<int> neighborStartTime = startTime;
-				int a = schedule[i][j-1];
-				int b = schedule[i][j];
+// 		for(int i = 0;i<schedule.size();i++)
+// 		{
+// 			for(int j = 1;j<schedule[i].size();j++)
+// 			{
+// 				matriz neighbor = schedule;
+// 				vector<int> neighborStartTime = startTime;
+// 				int a = schedule[i][j-1];
+// 				int b = schedule[i][j];
 				
-				int Bcompletiontime = startTime[b] + processingTime[b];
+// 				int Bcompletiontime = startTime[b] + processingTime[b];
 
-				neighborStartTime[b] = startTime[a];
-				neighborStartTime[a] = Bcompletiontime - processingTime[a];
+// 				neighborStartTime[b] = startTime[a];
+// 				neighborStartTime[a] = Bcompletiontime - processingTime[a];
 
-				neighbor[i][j - 1] = b;
-				neighbor[i][j] = a;
+// 				neighbor[i][j - 1] = b;
+// 				neighbor[i][j] = a;
 				
-				if(isScheduleCorrect(neighbor,neighborStartTime) && isProcessingOrderKept(neighbor,neighborStartTime))
-				{
-					// cout<<"TROCA VALIDA:"<<a<<" por "<<b<<endl;
-					// for(int x = 0;x<neighbor.size();x++)
-					// {
-					// 	cout<<"M"<<x<<":\n";
-					// 	for(int y = 0;b<neighbor[x].size();y++)
-					// 	{
-					// 	    cout<<"O"<<job[neighbor[x][y]] + 1<<machine[neighbor[x][y]]<<" ";
-					// 		cout<<machine[neighbor[x][y]]<<" ";
-					// 		cout<<processingTime[neighbor[x][y]]<<' ';
-					// 		cout<<dueDate[neighbor[x][y]]<<' ';
-					// 		cout<<earliness[neighbor[x][y]]<<' ';
-					// 		cout<<tardiness[neighbor[x][y]]<<' ';
-					// 		cout<<" start:"<<neighborStartTime[neighbor[x][y]]<<',';
-					// 		cout<<" completion:"<<neighborStartTime[neighbor[x][y]] + processingTime[neighbor[x][y]]<<" ";
-					// 		cout<<"   id:"<<neighbor[x][y]<<endl;
-        
-					// 	}
-					// }
-					neighborhood.push_back({neighbor,neighborStartTime});
-					// valid.push_back(i);
-				}
+// 				if(isScheduleCorrect(neighbor,neighborStartTime) && isProcessingOrderKept(neighbor,neighborStartTime))
+// 				{
+// 					neighborhood.push_back({neighbor,neighborStartTime});
+// 				}
 
-			}
-		}
+// 			}
+// 		}
 
-		return neighborhood;
-}
+// 		return neighborhood;
+// }
 
-pair<matriz,int>
-JIT_JSS::LocalSearch(matriz instance,int ITER_MAX)
-{
-	matriz schedule = EarliestDeadlineFirst(instance);
+// pair<matriz,int>
+// JIT_JSS::LocalSearch(matriz instance,int ITER_MAX)
+// {
+// 	matriz schedule = EarliestDeadlineFirst(instance);
 	
-	vector<double> initialPenalties = SchedulePenalties(schedule,startTime);
+// 	vector<double> initialPenalties = SchedulePenalties(schedule,startTime);
 	
-	int iter = 1;
-	while(iter <= ITER_MAX)
-	{
-		vector< pair<matriz,vector<int> > > neighborhood = Swap(schedule);
+// 	int iter = 1;
+// 	while(iter <= ITER_MAX)
+// 	{
+// 		vector< pair<matriz,vector<int> > > neighborhood = Swap(schedule);
 		
-		bool improvement = 0;
-		for(auto neighbor : neighborhood)
-		{
-			vector<double> neighborPenalties = SchedulePenalties(neighbor.first,neighbor.second);
-			vector<double> currentSchedulePenalties = SchedulePenalties(schedule,startTime);
+// 		bool improvement = 0;
+// 		for(auto neighbor : neighborhood)
+// 		{
+// 			vector<double> neighborPenalties = SchedulePenalties(neighbor.first,neighbor.second);
+// 			vector<double> currentSchedulePenalties = SchedulePenalties(schedule,startTime);
 
-			if(neighborPenalties[0] < currentSchedulePenalties[0])
-			{
-				improvement = 1;
-				schedule = neighbor.first;
-				startTime = neighbor.second;
-			}
-		}
-		if(!improvement)
-		{
-			//local max
-			break;
-		}
-		iter++;	
-	}
+// 			if(neighborPenalties[0] < currentSchedulePenalties[0])
+// 			{
+// 				improvement = 1;
+// 				schedule = neighbor.first;
+// 				startTime = neighbor.second;
+// 			}
+// 		}
+// 		if(!improvement)
+// 		{
+// 			//local max
+// 			break;
+// 		}
+// 		iter++;	
+// 	}
 
-	//cout<<"iteracoes:"<<iter<<endl;
-	return {schedule,iter};
+// 	//cout<<"iteracoes:"<<iter<<endl;
+// 	return {schedule,iter};
 
-}
+// }
 
 
 
 
 vector<int> JIT_JSS::CriticalPath(matriz schedule){
-
+	//cout<<"procurar caminho critico\n";
 	//g[0] : source node
 	//g[nOperations + 1] = sink node
 	int sinkID = nOperations + 1;
@@ -599,7 +597,7 @@ vector<int> JIT_JSS::CriticalPath(matriz schedule){
 	// 	else cout<<"sink ";
 	// }
 	// cout<<endl<<"makespan:"<<makespan<<endl;
-
+	//cout<<"achou caminho critico.\n";
 	return criticalPath;
 
 }
@@ -663,157 +661,169 @@ JIT_JSS::CriticalBlocks(vector<int> criticalPath)
 }
 
 
-//
+//block_op:op to be inserted in the beginning of the block
 pair<matriz,vector<int> >
-JIT_JSS::insertion1(matriz schedule, int block_op,int block_first_op,vector<int>scheduleStartTimes)
+JIT_JSS::insertion1(matriz schedule, int block_op,int block_first_op,vector<int>startTimes,int z)
 {
-	//cout<<"putting O"<<job[block_op] + 1<<machine[block_op]<<" in the beginning of the block:\n";
-			matriz neighbor = schedule;
-			vector<int>nstart = scheduleStartTimes;
-			//machine where block_op is processed
-			int iMachine = machine[block_op];
-			// cout<<"iMachine sequence:\n";
-			// for(int j = 0;j<schedule[iMachine].size();j++)
-			// {
-			// 	cout<<"O"<<job[schedule[iMachine][j]]+1<<machine[schedule[iMachine][j]]<<" ";
-			// }
-			// cout<<endl;
-			map<int,int>gap;
-			
-			//find the gaps between op and its predecessor in machine
-			for(int j = 0;j<schedule[iMachine].size();j++)
-			{
-				int op = schedule[iMachine][j];
-				if(j == 0)gap[op] = 0;
-				else
-				{
-					int prev = schedule[iMachine][j - 1];
-					gap[op] = scheduleStartTimes[op] - (scheduleStartTimes[prev] + processingTime[prev]);
-				}
-			}
+	if(z)cout<<"putting O"<<job[block_op] + 1<<machine[block_op]<<" in the beginning of the block:\n";
+	
+	//new neighbor
+	matriz neighbor = schedule;
+	//new start
+	vector<int>nstart = startTimes;
+	//machine where block_op is processed
+	int opMachine = machine[block_op];
+	if(z){
+	cout<<"original opMachine sequence:\n";
+	for(int j = 0;j<schedule[opMachine].size();j++)
+	{
+		cout<<"O"<<job[schedule[opMachine][j]]+1<<machine[schedule[opMachine][j]]<<" ";
+	}
+	cout<<endl;
+	}
+	map<int,int>gap;
+	
+	//find the gaps between op and its predecessor in machine
+	for(int j = 0;j<schedule[opMachine].size();j++)
+	{
+		int op = schedule[opMachine][j];
+		if(j == 0)gap[op] = 0;
+		else
+		{
+			int prev = schedule[opMachine][j - 1];
+			gap[op] = startTimes[op] - (startTimes[prev] + processingTime[prev]);
+		}
+	}
 
-			//new sequence for machine iMachine
-			vector<int>nMachine;
-			int current = 0,last = 0,idx = 0;
-			while(schedule[iMachine][current] != block_first_op)
-			{
-				nMachine.push_back(schedule[iMachine][current]);
-				last = schedule[iMachine][current];
-				current++;
-				idx++;
-			}
+	//new sequence for machine opMachine
+	vector<int>nMachine;
+	int current = 0,last = 0,idx = 0;
+	//add operations until block_first_op
+	while(schedule[opMachine][current] != block_first_op)
+	{
+		nMachine.push_back(schedule[opMachine][current]);
+		last = schedule[opMachine][current];
+		current++;
+		idx++;
+	}
 
-			//inserts block_op in the sequence;
-			nMachine.push_back(block_op);
-			//if there is a gap before block_first_op, put block_op after the gap
-			int prev_completion = nstart[last] + processingTime[last];
-			if(gap[schedule[iMachine][current]])
-			{
-				nstart[block_op] = prev_completion + gap[schedule[iMachine][current]];
-				gap[schedule[iMachine][current]] = 0;
-			}else nstart[block_op] = prev_completion;
+	//inserts block_op in the sequence before block_first_op;
+	nMachine.push_back(block_op);
+	nstart[block_op] = nstart[last] + processingTime[last] + gap[block_op];
+	// if(gap[schedule[opMachine][current]])
+	// {
+	// 	nstart[block_op] = prev_completion + gap[schedule[opMachine][current]];
+	// 	//gap for block_first_op is the gap for block_op
+	// 	gap[schedule[opMachine][current]] = gap[block_op];
+	// }else nstart[block_op] = prev_completion;
+	last = block_op;
 
-			last = block_op;
 
-			//put other operations in the sequence while shifting their start times
-			for(current;current < schedule[iMachine].size();current++)
-			{
-				if(schedule[iMachine][current] == block_op)continue;
-				nMachine.push_back(schedule[iMachine][current]);
-				//start = completion time of prev op + gap
-				nstart[schedule[iMachine][current]] = nstart[last] + processingTime[last] + gap[schedule[iMachine][current]];
-				last = schedule[iMachine][current];
-			}
+	//put other operations in the sequence while shifting their start times
+	for(current;current < schedule[opMachine].size();current++)
+	{
+		if(schedule[opMachine][current] == block_op)continue;
+		nMachine.push_back(schedule[opMachine][current]);
+		//start = completion time of prev op + gap
+		nstart[schedule[opMachine][current]] = nstart[last] + processingTime[last] + gap[schedule[opMachine][current]];
+		last = schedule[opMachine][current];
+	}
 
-			//change iMachine sequence in the neighbor
-			neighbor[iMachine] = nMachine;
-			
-			// cout<<"result:\n";
-			// for(int j = 0;j<neighbor[iMachine].size();j++)
-			// {
-			// 	int opstart = nstart[neighbor[iMachine][j]];
-			// 	int opproctime = processingTime[neighbor[iMachine][j]];
-			// 	cout<<"O"<<job[neighbor[iMachine][j]]+1<<machine[ neighbor[iMachine][j]]<<"("<<opstart<<","<<opstart + opproctime<<") ";
-			// }
-			// cout<<endl;
+	//change opMachine sequence in the neighbor
+	neighbor[opMachine] = nMachine;
+	
+	if(z){
+	cout<<"result:\n";
+	for(int j = 0;j<neighbor[opMachine].size();j++)
+	{
+		int opstart = nstart[neighbor[opMachine][j]];
+		int opproctime = processingTime[neighbor[opMachine][j]];
+		cout<<"O"<<job[neighbor[opMachine][j]]+1<<machine[ neighbor[opMachine][j]]<<"("<<opstart<<","<<opstart + opproctime<<") ";
+	}
+	cout<<endl;
+	}
 
-		return {neighbor,nstart};
+	return {neighbor,nstart};
 
 }
 
 pair<matriz,vector<int> >
- JIT_JSS::insertion2(matriz schedule,int block_op, int block_first_op,vector<int>scheduleStartTimes)
+ JIT_JSS::insertion2(matriz schedule,int block_op,int last_op,vector<int>startTimes)
  {
 	//cout<<"putting O"<<job[block_op] + 1<<machine[block_op]<<" in the END of the block:\n";
-			matriz neighbor = schedule;
-			vector<int>nstart = scheduleStartTimes;
-			//machine where block_op is processed
-			int iMachine = machine[block_op];
-			// cout<<"iMachine sequence:\n";
-			// for(int j = 0;j<schedule[iMachine].size();j++)
-			// {
-			// 	cout<<"O"<<job[schedule[iMachine][j]]+1<<machine[schedule[iMachine][j]]<<" ";
-			// }
-			// cout<<endl;
-			map<int,int>gap;
-			
-			//find the gaps between op and its predecessor in machine
-			for(int j = 0;j<schedule[iMachine].size();j++)
-			{
-				int op = schedule[iMachine][j];
-				if(j == 0)gap[op] = 0;
-				else
-				{
-					int prev = schedule[iMachine][j - 1];
-					gap[op] = scheduleStartTimes[op] - (scheduleStartTimes[prev] + processingTime[prev]);
-				}
-			}
+	matriz neighbor = schedule;
+	vector<int>nstart = startTimes;
+	//machine where block_op is processed
+	int iMachine = machine[block_op];
+	// cout<<"iMachine sequence:\n";
+	// for(int j = 0;j<schedule[iMachine].size();j++)
+	// {
+	// 	cout<<"O"<<job[schedule[iMachine][j]]+1<<machine[schedule[iMachine][j]]<<" ";
+	// }
+	// cout<<endl;
+	map<int,int>gap;
+	
+	//find the gaps between op and its predecessor in machine
+	for(int j = 0;j<schedule[iMachine].size();j++)
+	{
+		int op = schedule[iMachine][j];
+		if(j == 0)gap[op] = 0;
+		else
+		{
+			int prev = schedule[iMachine][j - 1];
+			gap[op] = startTimes[op] - (startTimes[prev] + processingTime[prev]);
+		}
+	}
 
-			//new sequence for machine iMachine
-			vector<int>nMachine;
-			int current = 0,last = 0,idx = 0;
-			while(schedule[iMachine][current] != block_op)
-			{
-				nMachine.push_back(schedule[iMachine][current]);
-				last = schedule[iMachine][current];
-				current++;
-				idx++;
-			}
+	//new sequence for machine iMachine
+	vector<int>nMachine;
+	int current = 0,last = 0,idx = 0;
+	while(schedule[iMachine][current] != block_op)
+	{
+		nMachine.push_back(schedule[iMachine][current]);
+		last = schedule[iMachine][current];
+		current++;
+		idx++;
+	}
 
-			// //inserts block_op in the sequence;
-			// nMachine.push_back(block_op);
-
-			//if there is a gap before block_op, it will be considered in the sucessor of block_op
-			//at this point current == block_op
-			int prev_completion = nstart[last] + processingTime[last];
-			if(gap[schedule[iMachine][current]])
-			{
-				gap[schedule[iMachine][current + 1]] += gap[schedule[iMachine][current]];
-				//nstart[block_op] = prev_completion + gap[schedule[iMachine][current]];
-				gap[schedule[iMachine][current]] = 0;
-			}
-			
-			current++;
-			//keep putting other operations in the sequence while shifting their start times
-			for(current;current < schedule[iMachine].size();current++)
-			{
-				if(schedule[iMachine][current] == block_op)continue;
-				nMachine.push_back(schedule[iMachine][current]);
-				//start = completion time of prev op + gap
-				nstart[schedule[iMachine][current]] = nstart[last] + processingTime[last] + gap[schedule[iMachine][current]];
-				last = schedule[iMachine][current];
-			}
-
-			//now put block_op in the end of sequence
+	//if there is a gap before block_op, it will be considered in the sucessor of block_op
+	//at this point current == block_op
+	// int prev_completion = nstart[last] + processingTime[last];
+	// if(gap[schedule[iMachine][current]])
+	// {
+	// 	gap[schedule[iMachine][current + 1]] += gap[schedule[iMachine][current]];
+	// 	//nstart[block_op] = prev_completion + gap[schedule[iMachine][current]];
+	// 	//gap[schedule[iMachine][current]] = 0;
+	// }
+	
+	current++;
+	//keep putting other operations in the sequence while shifting their start times
+	for(current;current < schedule[iMachine].size();current++)
+	{
+		if(schedule[iMachine][current] == block_op)continue;
+		nMachine.push_back(schedule[iMachine][current]);
+		//start = completion time of prev op + gap
+		nstart[schedule[iMachine][current]] = nstart[last] + processingTime[last] + gap[schedule[iMachine][current]];
+		last = schedule[iMachine][current];
+		if(last == last_op)
+		{
+			//putting block_op after last op of the block
 			nMachine.push_back(block_op);
-			nstart[block_op] = nstart[last] + processingTime[last];
+			nstart[block_op] = nstart[last] + processingTime[last] + gap[block_op];
+			last = block_op;
+		}
+	}
 
-			//change iMachine sequence in the neighbor
-			neighbor[iMachine] = nMachine;
-			
+	// //now put block_op in the end of sequence
+	// nMachine.push_back(block_op);
+	// nstart[block_op] = nstart[last] + processingTime[last] + gap[block_op];
 
-		return {neighbor,nstart};
- 
+	//change iMachine sequence in the neighbor
+	neighbor[iMachine] = nMachine;
+	
+
+return {neighbor,nstart};
+
  }
 
 //block_op:first operation of the block
@@ -821,7 +831,7 @@ pair<matriz,vector<int> >
 pair<matriz,vector<int> >
 JIT_JSS::insertion3(matriz schedule,int prev_op,int block_op,vector<int> scheduleStartTimes){
 
-	// cout<<"inserting O"<<job[block_op] + 1<<machine[block_op]<<" after O"<<job[prev_op] + 1<<machine[prev_op]<<endl;
+	//cout<<"inserting O"<<job[block_op] + 1<<machine[block_op]<<" after O"<<job[prev_op] + 1<<machine[prev_op]<<endl;
 	matriz neighbor = schedule;
 	vector<int>nstart = scheduleStartTimes;
 
@@ -841,6 +851,10 @@ JIT_JSS::insertion3(matriz schedule,int prev_op,int block_op,vector<int> schedul
 		}
 	}
 
+	// cout<<"original sequence\n";
+	// for(int i : schedule[iMachine])cout<<"O"<<job[i] + 1<<machine[i]<<"("<<nstart[i]<<","<<nstart[i] + processingTime[i]<<") ";
+	// cout<<endl;
+
 	//new sequence for iMachine;
 	vector<int>nMachine;
 
@@ -858,12 +872,12 @@ JIT_JSS::insertion3(matriz schedule,int prev_op,int block_op,vector<int> schedul
 	//if there is a gap before block_op, it will be considered in the sucessor of block_op
 	//at this point current == block_op
 	//int prev_completion = nstart[last] + processingTime[last];
-	if(gap[schedule[iMachine][current]])
-	{
-		gap[schedule[iMachine][current + 1]] += gap[schedule[iMachine][current]];
-		//nstart[block_op] = prev_completion + gap[schedule[iMachine][current]];
-		gap[schedule[iMachine][current]] = 0;
-	}
+	// if(gap[schedule[iMachine][current]])
+	// {
+	// 	gap[schedule[iMachine][current + 1]] += gap[schedule[iMachine][current]];
+	// 	//nstart[block_op] = prev_completion + gap[schedule[iMachine][current]];
+	// 	gap[schedule[iMachine][current]] = 0;
+	// }
 
 
 	current++; 
@@ -871,7 +885,7 @@ JIT_JSS::insertion3(matriz schedule,int prev_op,int block_op,vector<int> schedul
 	//keep inserting other operations in the sequence while shifting their start times
 	for(current;current < schedule[iMachine].size();current++)
 	{
-		if(schedule[iMachine][current] == block_op)continue;
+		//if(schedule[iMachine][current] == block_op)continue;
 		nMachine.push_back(schedule[iMachine][current]);
 		//start = completion time of prev op + gap
 		nstart[schedule[iMachine][current]] = nstart[last] + processingTime[last] + gap[schedule[iMachine][current]];
@@ -903,17 +917,11 @@ JIT_JSS::insertion3(matriz schedule,int prev_op,int block_op,vector<int> schedul
 pair<matriz,vector<int> >
 JIT_JSS::insertion4(matriz schedule,int next_op,int block_op,vector<int> scheduleStartTimes)
 {
-	// cout<<"inserting O"<<job[block_op] + 1<<machine[block_op]<<" before O"<<job[next_op] + 1<<machine[next_op]<<endl;
 	matriz neighbor = schedule;
 	vector<int> nstart = scheduleStartTimes;
 
 	int iMachine = machine[block_op];
-	// cout<<"iMachine sequence:\n";
-	// for(int j = 0;j<schedule[iMachine].size();j++)
-	// {
-	// 	cout<<"O"<<job[schedule[iMachine][j]]+1<<machine[schedule[iMachine][j]]<<"("<<scheduleStartTimes[schedule[iMachine][j]]<<","<<scheduleStartTimes[schedule[iMachine][j]] + processingTime[schedule[iMachine][j]]<<") ";
-	// }
-	// cout<<endl;
+
 	map<int,int>gap;
 	
 	//find the gaps between op and its predecessor in machine
@@ -943,14 +951,15 @@ JIT_JSS::insertion4(matriz schedule,int next_op,int block_op,vector<int> schedul
 	}
 
 	nMachine.push_back(block_op);
+	nstart[block_op] = nstart[last] + processingTime[last] + gap[block_op];
 
 	//if there is a gap before next_op, put block_op after the gap
-	int prev_completion = nstart[last] + processingTime[last];
-	if(gap[schedule[iMachine][current]])
-	{
-		nstart[block_op] = prev_completion + gap[schedule[iMachine][current]];
-		gap[schedule[iMachine][current]] = 0;
-	}else nstart[block_op] = prev_completion;
+	// int prev_completion = nstart[last] + processingTime[last];
+	// if(gap[schedule[iMachine][current]])
+	// {
+	// 	nstart[block_op] = prev_completion + gap[schedule[iMachine][current]];
+	// 	gap[schedule[iMachine][current]] = 0;
+	// }else nstart[block_op] = prev_completion;
 
 	last = block_op;
 
@@ -968,13 +977,6 @@ JIT_JSS::insertion4(matriz schedule,int next_op,int block_op,vector<int> schedul
 	//change iMachine sequence in the neighbor
 	neighbor[iMachine] = nMachine;
 
-	// cout<<"sequence after change:\n";
-	// for(int j = 0;j<nMachine.size();j++)
-	// {
-	// 	cout<<"O"<<job[nMachine[j]]+1<<machine[nMachine[j]]<<"("<<nstart[nMachine[j]]<<","<<nstart[nMachine[j]] + processingTime[nMachine[j]]<<") ";
-	// }
-	// cout<<endl;
-
 	//change sequence
 	neighbor[iMachine] = nMachine;
 
@@ -986,8 +988,9 @@ JIT_JSS::insertion4(matriz schedule,int next_op,int block_op,vector<int> schedul
 
 
 vector<Neighbor>
-JIT_JSS::N7(matriz schedule,vector<int> scheduleStartTimes)
+JIT_JSS::N7(matriz schedule,vector<int> startTimes)
 {
+	// cout<<"inicio n7\n";
 	vector<int> criticalPath = CriticalPath(schedule);
 	vector< vector<int> > blocks = CriticalBlocks(criticalPath);
 
@@ -995,23 +998,31 @@ JIT_JSS::N7(matriz schedule,vector<int> scheduleStartTimes)
 
 	for(vector<int> block : blocks)
 	{
-		if(block.size() == 2)continue;
+		if(block.size() <= 2)continue;
 
-		//inserting operation at the beginning and at the end of the block
+		// cout<<"current block:\n";
+		// for(int i : block)cout<<"O"<<job[i] + 1<<machine[i]<<" ";
+		// cout<<endl;
+
+		//inserting operation from the middle of the block in the first and last pos in the block
 		for(int i = 1;i< block.size() - 1;i++)
 		{
-			//inserting operation in the beginning of the block
-			pair<matriz,vector<int> > sequence = insertion1(schedule,block[i],block[0],scheduleStartTimes);
-			Neighbor neighbor = {sequence, {block[i],block[0]}};
-			if(isScheduleCorrect(neighbor.first.first,neighbor.first.second) && isProcessingOrderKept(neighbor.first.first,neighbor.first.second))
+			//inserting a operation in the beginning of the block
+			Schedule newSchedule = insertion1(schedule,block[i],block[0],startTimes,0);
+			Neighbor neighbor = {newSchedule, {block[i],block[0]}};
+			if(isScheduleCorrect(neighbor.first.first,neighbor.first.second)
+			&& isProcessingOrderKept(neighbor.first.first,neighbor.first.second)
+			&& isSequenceCorrect(neighbor.first.first,neighbor.first.second))
 			{
 				neighborhood.push_back(neighbor);
 			}
 			
-			//inserting operation in the end of the block;
-			sequence = insertion2(schedule,block[i],block[0],scheduleStartTimes);
-			neighbor = {sequence,{block[i],block[block.size() - 1]}};
-			if(isScheduleCorrect(neighbor.first.first,neighbor.first.second) && isProcessingOrderKept(neighbor.first.first,neighbor.first.second))
+			// inserting a operation in the end of the block;
+			newSchedule = insertion2(schedule,block[i],block[block.size() - 1],startTimes);
+			neighbor = {newSchedule,{block[i],block[block.size() - 1]}};
+			if(isScheduleCorrect(neighbor.first.first,neighbor.first.second)
+			&& isProcessingOrderKept(neighbor.first.first,neighbor.first.second)
+			&& isSequenceCorrect(neighbor.first.first,neighbor.first.second))
 			{
 				neighborhood.push_back(neighbor);
 			}
@@ -1021,99 +1032,219 @@ JIT_JSS::N7(matriz schedule,vector<int> scheduleStartTimes)
 		for(int  i = 1;i<block.size() - 1;i++)
 		{
 			//inserting first op of block in the middle of the block
-			pair<matriz,vector<int> > sequence = insertion3(schedule,block[i],block[0],scheduleStartTimes);
-			Neighbor neighbor = {sequence,{block[i],block[0]}};
-			if(isScheduleCorrect(neighbor.first.first,neighbor.first.second) && isProcessingOrderKept(neighbor.first.first,neighbor.first.second))
+			Schedule newSchedule = insertion3(schedule,block[i],block[0],startTimes);
+			Neighbor neighbor = {newSchedule,{block[i],block[0]}};
+			if(isScheduleCorrect(neighbor.first.first,neighbor.first.second)
+			&& isProcessingOrderKept(neighbor.first.first,neighbor.first.second)
+			&& isSequenceCorrect(neighbor.first.first,neighbor.first.second))
 			{
 				neighborhood.push_back(neighbor);
 			}
 
-			//inserting last op of block in the middle of the block
-			sequence = insertion4(schedule,block[i],block[block.size() - 1],scheduleStartTimes);
-			neighbor = {sequence,{block[i],block[block.size() - 1]}};
+		// 	//inserting last op of block in the middle of the block
+			newSchedule = insertion4(schedule,block[i],block[block.size() - 1],startTimes);
+			neighbor = {newSchedule,{block[i],block[block.size() - 1]}};
 			if(isScheduleCorrect(neighbor.first.first,neighbor.first.second) && isProcessingOrderKept(neighbor.first.first,neighbor.first.second))
 			{
 				neighborhood.push_back(neighbor);
 			}
 		}
 
-		//cout<<endl<<endl;
+		// cout<<endl<<endl;
 
 
 		
 
 	}
 
+	// cout<<"fim n7\n";
 	return neighborhood;
 
 }
 
-matriz
+vector<Neighbor>
+JIT_JSS::Swap(matriz schedule,vector<int> startTimes){
+
+	vector<Neighbor>neighborhood;
+
+	for(int i = 0;i<schedule.size();i++)
+	{
+		for(int j = 1;j<schedule[i].size();j++)
+		{
+			Neighbor neighbor;
+			int op1 = schedule[i][j-1];
+			int op2 = schedule[i][j];
+			pair<vector<int>,vector<int> > a = SwapAdj(schedule[i],startTimes,op1,op2);
+			neighbor.first.first = schedule;
+			neighbor.first.first[i] = a.first;
+			neighbor.first.second = a.second;
+			neighbor.second = {op1,op2};
+			if(isScheduleCorrect(neighbor.first.first,neighbor.first.second)
+			&& isProcessingOrderKept(neighbor.first.first,neighbor.first.second)
+			&& isSequenceCorrect(neighbor.first.first,neighbor.first.second))
+			{
+				neighborhood.push_back(neighbor);
+			}
+		}
+	}
+
+	return neighborhood;
+}
+
+
+Schedule
 JIT_JSS::TabuSearch(matriz instance, int MAX_ITER, int TABU_TENURE)
 {
-	matriz x = EarliestDeadlineFirst(instance);
+	Schedule x = EarliestDeadlineFirst(instance);
 
-	cout<<"penalidade inicial:\n";
-	vector<double>v = SchedulePenalties(x,startTime);
-	cout<<v[0]<<endl;
+	//two ops representing the move in any iteration	
+	int op1 = 0,op2 = 0;
 
-	matriz current = x;
-	vector<int> currentStartTime = startTime;
+	Schedule current = x;
+
 	int tabuList[201][201];
 
 	for(int i = 0;i<201;i++)
 		for(int j = 0;j<201;j++)
-			tabuList[i][j] = 0;
+			tabuList[i][j] = -TABU_TENURE;
 
 	int iter = 1;
 
 	while(iter <= MAX_ITER)
 	{
-		vector< Neighbor> neighborhood = N7(current,currentStartTime);
-		Neighbor candidate = neighborhood[0];
+		cout<<"iter "<<iter<<endl;
+		vector<Neighbor> neighborhood = N7(current.first,current.second);
+		//vector<Neighbor> neighborhood = Swap(current.first,current.second);
+		
+		cout<<"neighborhood size:"<<neighborhood.size()<<endl;
 
-		//choose best neighbor
+		if(!neighborhood.size())break;
+
+		//finding best candidate among all neighbors
+		Neighbor bestCandidate = neighborhood[0];
 		for(Neighbor neighbor : neighborhood)
 		{
-			int op1 = neighbor.second[0];
-			int op2 = neighbor.second[1];
-			matriz sequence = neighbor.first.first;
-			vector<int> sequenceStartTimes = neighbor.first.second;
-			vector<double> neighborpenalties = SchedulePenalties(sequence,sequenceStartTimes);
-			vector<double> candidatepenalties = SchedulePenalties(candidate.first.first,candidate.first.second);
-			if(tabuList[op1][op2] + TABU_TENURE <= iter && neighborpenalties[0] < candidatepenalties[0])
+			int opmove1 = neighbor.second[0];
+			int opmove2 = neighbor.second[1];
+
+			vector<double>penaltiesbest = SchedulePenalties(bestCandidate.first.first,bestCandidate.first.second);
+			vector<double>penaltiescurr = SchedulePenalties(neighbor.first.first,neighbor.first.second);
+
+			if(tabuList[opmove1][opmove2] + TABU_TENURE <= iter
+			&& penaltiescurr[0] < penaltiesbest[0])
 			{
-				candidate = neighbor;
+				bestCandidate = neighbor;
+				op1 = opmove1;
+				op2 = opmove2;
 			}
 		}
 
 		//check if candidate is better than the best solution found so far
-		vector<double>xpenalties = SchedulePenalties(x,startTime);
-		vector<double>candidatepenalties = SchedulePenalties(candidate.first.first,candidate.first.second);
-		if(candidatepenalties[0] < xpenalties[0])
-		{
-			x = candidate.first.first; //sequence of ops in machines
-			startTime = candidate.first.second; //start times for the ops
-		}
+		vector<double>penaltiesbest = SchedulePenalties(x.first,x.second);
+		vector<double>penaltiescandidate = SchedulePenalties(bestCandidate.first.first,bestCandidate.first.second);
 
-		//updates current anyway with the best candidate found
-		current = candidate.first.first;
+		if(penaltiescandidate[0] < penaltiesbest[0])x = bestCandidate.first;
 
-		//update tabu list
+		cout<<"penalidade candidato:"<<penaltiescandidate[0]<<endl;
+
+		//updates current anyway with best candidate found in neighborhood
+		current = bestCandidate.first;
+
+		//updates tabu list
 		for(int i = 0;i<201;i++)
 		{
 			for(int j = 0;j<201;j++)
 			{
-				if(tabuList[i][j] + TABU_TENURE <= iter)tabuList[i][j] = 0;
+				if(tabuList[i][j] + TABU_TENURE <= iter)tabuList[i][j] = -TABU_TENURE;
 			}
 		}
+
+		tabuList[op1][op2] = iter;
 
 		iter++;
 
 
 	}
-		cout<<"iteracoes:"<<iter<<endl;
-		return x;
 
+	cout<<"ITERACOES:"<<iter<<endl;
+
+
+
+	return x;
+
+	
 }
 
+//returns sequence and start times
+pair<vector<int>,vector<int> >
+JIT_JSS::SwapAdj(vector<int>sequence,vector<int>stimes,int op1,int op2)
+{
+	//swap op1 and op2
+	for(int i = 0;i<sequence.size();i++)
+	{
+		if(sequence[i] == op2)
+		{
+			int op2completion = stimes[op2] + processingTime[op2];
+			stimes[op2] = stimes[op1];
+			stimes[op1] = op2completion - processingTime[op1];
+
+			sequence[i] = op1;
+			sequence[i - 1] = op2;
+			break;
+		}
+	}
+
+	return {sequence,stimes};
+}
+
+vector<Neighbor>
+JIT_JSS::N5(matriz schedule,vector<int>scheduleStartTimes)
+{
+	vector<int> criticalPath = CriticalPath(schedule);
+	vector< vector<int> > blocks = CriticalBlocks(criticalPath);
+
+	vector<Neighbor> neighborhood;
+
+	for(vector<int> block : blocks)
+	{
+		if(block.size() < 2)continue;
+		
+		//swap first two and last two ops in block
+
+		matriz sequence = schedule;
+		vector<int>neighbortimes = scheduleStartTimes;
+
+		//machine of ops in block
+		int iMachine = machine[block[0]];
+		pair<vector<int>,vector<int> > newSequence = SwapAdj(sequence[iMachine],neighbortimes,block[0],block[1]);
+		sequence[iMachine] = newSequence.first;
+		neighbortimes = newSequence.second;
+		Neighbor neighbor = {{sequence,neighbortimes},{block[0],block[1]}};
+
+		if(isScheduleCorrect(neighbor.first.first,neighbor.first.second)
+		&& isProcessingOrderKept(neighbor.first.first,neighbor.first.second)
+		&& isSequenceCorrect(neighbor.first.first,neighbor.first.second))
+		{
+			neighborhood.push_back(neighbor);
+		}
+
+		sequence = schedule;
+		neighbortimes = scheduleStartTimes;
+		int n = block.size();
+		newSequence = SwapAdj(sequence[iMachine],neighbortimes,block[n - 2],block[n - 1]);
+		sequence[iMachine] = newSequence.first;
+		neighbortimes = newSequence.second;
+		
+		neighbor = {{sequence,neighbortimes},{block[n - 2],block[n - 1]}};
+				if(isScheduleCorrect(neighbor.first.first,neighbor.first.second)
+		&& isProcessingOrderKept(neighbor.first.first,neighbor.first.second)
+		&& isSequenceCorrect(neighbor.first.first,neighbor.first.second))
+		{
+			neighborhood.push_back(neighbor);
+		}
+
+	}
+
+	return neighborhood;
+	
+}
