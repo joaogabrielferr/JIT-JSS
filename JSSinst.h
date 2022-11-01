@@ -85,8 +85,8 @@ vector<Neighbor>
 Swap(matriz schedule,vector<int> startTimes);
 
 // pair <sequence , iterations >
-pair<matriz,int>
-LocalSearch(matriz instance,int MAX_ITER);
+pair<Schedule,int>
+LocalSearch(matriz instance,int MAX_ITER,int flag,string nflag,Schedule schedule = {});
 
 
 vector<int>
