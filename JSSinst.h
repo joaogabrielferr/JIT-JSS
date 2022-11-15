@@ -7,7 +7,8 @@
 #include<fstream>
 #include<algorithm>
 #include<stack>
-#include <map>
+#include<map>
+#include<set>
 
 using namespace std;
 
@@ -84,6 +85,16 @@ isSequenceCorrect(matriz schedule,vector<int>scheduleStartTime);
 vector<Neighbor>
 Swap(matriz schedule,vector<int> startTimes);
 
+vector<Neighbor>
+SwapTest(matriz sequence);
+
+pair<Schedule,int>
+LocalSearchTest(matriz instance,int MAX_ITER);
+
+//calculate start times for a sequence of operations
+vector<int>
+StartTime(matriz sequence);
+
 // pair <sequence , iterations >
 pair<Schedule,int>
 LocalSearch(matriz instance,int MAX_ITER,int flag,string nflag,Schedule schedule = {});
@@ -93,7 +104,7 @@ vector<int>
 CriticalPath(matriz schedule);
 
 void
-TopologicalSort(int v,vector<bool>&visited,stack<int>&Stack,vector< vector<int> >&g);
+TopologicalSort(int v,vector<bool>&visited,std::stack<int>&Stack,vector< vector<int> >&g);
 
 vector< vector<int> >
 CriticalBlocks(vector<int> criticalPath);
@@ -120,8 +131,20 @@ insertion3(matriz schedule,int prev_op,int block_op, vector<int> scheduleStartTi
 pair<matriz,vector<int> >
 insertion4(matriz schedule,int next_op,int block_op, vector<int> scheduleStartTimes);
 
-Schedule
+pair<Schedule,int>
 TabuSearch(matriz instance, int MAX_ITER, int TABU_TENURE);
+
+Schedule
+DelayOperations(Schedule s);
+
+vector<int>
+Calc(matriz sequence,vector<int>starttime);
+
+vector< vector<int> >
+createDAG(matriz sequence,int sinkID);
+
+vector< vector<int> >
+TransposeDAG(vector<vector<int> >g);
 
 };
 
