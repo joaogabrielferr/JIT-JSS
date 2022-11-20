@@ -15,7 +15,7 @@ int main(int argc,char **argv)
     // cout<<"schedule:\n";
     // for(int i = 0;i<ini.first.size();i++)
     // {
-    //     cout<<"O"<<c.job[i]+1<<c.machine[i]<<":";
+    //     cout<<i<<":";
     //     for(int j = 0;j<ini.first[i].size();j++)
     //     {
     //         cout<<"O"<<c.job[ini.first[i][j]] + 1<<c.machine[ini.first[i][j]]<<"("<<ini.second[ini.first[i][j]]<<","<<ini.second[ini.first[i][j]] + c.processingTime[ini.first[i][j]]<<") ";
@@ -24,31 +24,43 @@ int main(int argc,char **argv)
 
     // }
 
-    // ini.second = c.Calc(ini.first,ini.second);
+    // ini.second = c.Calc2(ini.first,ini.second);
     // vector<double>p2 = c.SchedulePenalties(ini.first,ini.second);
     // cout<<"ini:"<<p1[0]<<endl<<"ini with calc:"<<p2[0]<<endl;
+    // cout<<"schedule:\n";
+    // for(int i = 0;i<ini.first.size();i++)
+    // {
+    //     cout<<i<<":";
+    //     for(int j = 0;j<ini.first[i].size();j++)
+    //     {
+    //         cout<<"O"<<c.job[ini.first[i][j]] + 1<<c.machine[ini.first[i][j]]<<"("<<ini.second[ini.first[i][j]]<<","<<ini.second[ini.first[i][j]] + c.processingTime[ini.first[i][j]]<<") ";
+    //     }
+    //     cout<<endl;
+
+    // }
 
 
 
 
-    // return 0;
+    //return 0;
 
-    if(argc == 0)
-    {
-        cout<<"no argument provided\n";
-        return -1;
-    }
+    // if(argc == 0)
+    // {
+    //     cout<<"no argument provided\n";
+    //     return -1;
+    // }
     JIT_JSS jit;
-    string file_path(argv[1]);
-    jit.parseInstance(file_path);
-    //jit.parseInstance("instance.txt");
+    //string file_path(argv[1]);
+    //jit.parseInstance(file_path);
+    jit.parseInstance("instance.txt");
 
-    pair<Schedule,int> output = jit.LocalSearch(jit.processingOrder,1000,0,"SWAP");
+    //pair<Schedule,int> output = jit.LocalSearch(jit.processingOrder,1000,0,"SWAP");
+    pair<Schedule,int> output = jit.TabuSearch(jit.processingOrder,300,8);
     
     Schedule schedule = output.first;
 
     vector<double>penalties = jit.SchedulePenalties(schedule.first,schedule.second);
-    
+
     //penalidade inicial
     Schedule inicial = jit.EarliestDeadlineFirst(jit.processingOrder);
     vector<double>pi = jit.SchedulePenalties(inicial.first,inicial.second);

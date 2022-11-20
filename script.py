@@ -188,11 +188,28 @@ def convert(file_name):
 
 
 
+def compare():
+    pd.options.display.max_rows = 9999
+    df = pd.read_csv('compare.csv')
+    df = df.reset_index()  # make sure indexes pair with number of rows
+    
+    i = 1
+    for index,row in df.iterrows():
+        v1 = row['S']
+        v2 = row['S1']
+        v1 = float(v1)
+        v2 = float(v2)
+        d = v1 - v2
+        with open('resultadosdiferenca.csv','a',newline='') as planilha:
+            linha = [d]
+            w = writer(planilha)
+            w.writerow(linha)
+            planilha.close()
 
 
             
 def main():
-    oneN()
+    compare()
 
 if __name__ == '__main__':
     main()
