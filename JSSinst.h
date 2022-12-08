@@ -9,6 +9,9 @@
 #include<stack>
 #include<map>
 #include<set>
+#include <chrono>
+#include <iomanip>
+
 
 using namespace std;
 
@@ -63,7 +66,7 @@ parseInstance(string path);
 Schedule
 EarliestDeadlineFirst(matriz instance);
 
-matriz
+Schedule
 GifflerThompson(matriz instance);
 
 //output[0] = total penalties,output[1] = total earliness,output[2] = total tardiness
@@ -100,7 +103,7 @@ InsertOperationBefore(matriz sequence,int op1,int op2);
 matriz
 InsertOperationAfter(matriz sequence,int op1,int op2);
 
-pair<Schedule,int>
+pair<pair<Schedule,int>,long long>
 LocalSearchTest(matriz instance,int MAX_ITER);
 
 //find start time for operations in a sequence
@@ -131,6 +134,9 @@ N7_2(matriz schedule);
 
 vector<Neighbor>
 N5(matriz schedule,vector<int> scheduleStartTimes);
+
+vector<Neighbor>
+N5_2(matriz schedule);
 
 pair<matriz,vector<int> >
 insertion1(matriz schedule, int block_op,int block_first_op, vector<int> scheduleStartTimes,int z);

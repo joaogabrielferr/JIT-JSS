@@ -11,19 +11,21 @@ def oneN():
     with open('output.txt','r+') as file:
         for i in range(0,len(sizes)): #len(sizes)
             for k in range(0,len(names)): #len(names)
-                for j in range(0,len(sizes)): #len(sizes)
+                for j in range(0,3): #len(sizes)
                     instance_size = sizes[i][j]
                     
                     for ins in range(1,3):
                         instance_name = names[k]
-                        print("NOVA EXECUCAO,", instance_name,",",instance_size,",",ins)
                         file_name = 'C:\\Users\\joaog\Desktop\\JIT-JSS\\JIT-JSS\\instances\\' + str(instance_name) + '\\test' + str(ins) + '_' + str(instance_size) + '.txt'
-                        p = subprocess.run(['tcc',file_name],stdout = file,text=True);
+                        # print("file name:",file_name)
+                        tabu_tenure = "5"
+                        # print("antes de rodar")
+                        p = subprocess.run(['tcc',file_name,tabu_tenure],stdout = file,text=True)
                         file.seek(0)
                         data = file.readlines()
                         #sequence: S,S0,iteracoes,earliness0,tardiness0,earliness,tardiness
                         print(data)
-                        if len(data) != 7:
+                        if len(data) != 8:
                             print("WRONG OUTPUT")
                             exit()
                         s = float(data[0])
@@ -33,7 +35,8 @@ def oneN():
                         tardiness0 = float(data[4])
                         earliness = float(data[5])
                         tardiness = float(data[6])
-                        print(s," ",s0," ",iter," ",earliness0," ",tardiness0," ",earliness," ",tardiness)
+                        tempoInicial = float(data[7])
+                        print(s," ",s0," ",iter," ",earliness0," ",tardiness0," ",earliness," ",tardiness," ",tempoInicial)
                         
                         file.seek(0)
                         file.truncate()
@@ -41,7 +44,7 @@ def oneN():
                         
                         with open('resultados.csv','a',newline='') as planilha:
                             nome_instancia = instance_name + '_' + instance_size + '_' + str(ins); 
-                            linha = [nome_instancia,s,'_',s0,iter,earliness0,tardiness0,earliness,tardiness,0,0,0]
+                            linha = [nome_instancia,s,s0,iter,earliness0,tardiness0,earliness,tardiness,tempoInicial,0,0,0]
                             w = writer(planilha)
                             w.writerow(linha)
                             planilha.close()
@@ -52,6 +55,14 @@ def oneN():
                             earliness = None
                             tardiness0 = None
                             tardiness = None
+
+
+def GetSizes(str):
+    size1 = str[0:2]
+    size2 = str[3:]
+    return (size1,size2)
+
+
 
 
 def twoN():
@@ -66,6 +77,7 @@ def twoN():
                     
                     for ins in range(1,3):
                         instance_name = names[k]
+                        
                         print("NOVA EXECUCAO,", instance_name,",",instance_size,",",ins)
                         file_name = 'C:\\Users\\joaog\Desktop\\JIT-JSS\\JIT-JSS\\instances\\' + str(instance_name) + '\\test' + str(ins) + '_' + str(instance_size) + '.txt'
                         p = subprocess.run(['tcc',file_name],stdout = file,text=True);
@@ -127,6 +139,121 @@ def addDifference(file_name):
 
 
 
+def average():
+    pd.options.display.max_rows = 9999
+    df = pd.read_csv('atual.csv')
+    df = df.reset_index()  # make sure indexes pair with number of rows
+    
+    best = 0
+
+    total = 0
+
+    for index,row in df.iterrows():
+        paper1 = row['AE']
+        paper2 = row['VNS/MP']
+        paper3 = row['VNS']
+       
+        # paper1 = row['S Dos Santos(2010)']
+        # paper2 = row['S Wang & Li(2014)']
+        # paper3 = row['S Ahmadian (2021)']
+        paper1 = float(paper1)
+        paper2 = float(paper2)
+        paper3 = float(paper3)
+
+        currbest = min(paper1,paper2,paper3)
+        
+        s1 = row['S1']
+        s2 = row['S2']
+        s1 = float(s1)
+        s2 = float(s2)
+        s = max(s1,s2)
+        s = ((s - currbest)/currbest)*100
+        sformatado = "{:.2f}".format(s) + '%'
+
+        with open('resultados.csv','a',newline='') as planilha:
+            linha = [sformatado]
+            w = writer(planilha)
+            w.writerow(linha)
+            planilha.close()
+
+    #     s = row['S']
+    #     s = float(s)
+    #     #print("curr s:",s,", curr best:",currbest)
+    #     s = ((s - currbest)/currbest)*100
+    #     #print("s after converting:",s)
+    #     total = total + s
+
+    # total = total/72
+    # print("media:",total)
+        
+
+def averageCombination():
+    pd.options.display.max_rows = 9999
+    df = pd.read_csv('atual.csv')
+    df = df.reset_index()  # make sure indexes pair with number of rows
+    
+    _10x2 = 0
+    _10x5 = 0
+    _10x10 = 0
+    _15x2 = 0
+    _15x5 = 0
+    _15x10 = 0
+    _20x2 = 0
+    _20x5 = 0
+    _20x10 = 0
+
+    for index,row in df.iterrows():
+        paper1 = row['S Dos Santos(2010)']
+        paper2 = row['S Wang & Li(2014)']
+        paper3 = row['S Ahmadian (2021)']
+        instancia = row['instancia']
+        paper1 = float(paper1)
+        paper2 = float(paper2)
+        paper3 = float(paper3)
+        currbest = min(paper1,paper2,paper3)
+        s = row['S']
+        s = float(s)
+        s = ((s - currbest)/currbest)*100
+
+        if "10x2" in instancia:
+            _10x2+=s
+        if "10x5" in instancia:
+            _10x5+=s
+        if "10x10" in instancia:
+            _10x10+=s
+        if "15x2" in instancia:
+            _15x2+=s
+        if "15x5" in instancia:
+            _15x5+=s
+        if "15x10" in instancia:
+            _15x10+=s
+        if "20x2" in instancia:
+            _20x2+=s
+        if "20x5" in instancia:
+            _20x5+=s
+        if "20x10" in instancia:
+            _20x10+=s
+
+    _10x2/=8
+    _10x5/=8
+    _10x10/=8
+    _15x2/=8
+    _15x5/=8
+    _15x10/=8
+    _20x2/=8
+    _20x5/=8
+    _20x10/=8
+
+    print("10x2",_10x2)
+    print("10x5",_10x5)
+    print("10x10",_10x10)
+    print("15x2",_15x2)
+    print("15x5",_15x5)
+    print("15x10",_15x10)
+    print("20x2",_20x2)
+    print("20x5",_20x5)
+    print("20x10",_20x10)
+    
 
 
 def convert(file_name):    
@@ -207,9 +334,34 @@ def compare():
             planilha.close()
 
 
-            
+def comparePenalties():
+    pd.options.display.max_rows = 9999
+    df = pd.read_csv('atual.csv')
+    df = df.reset_index()  # make sure indexes pair with number of rows
+    
+    total = 0
+    for index,row in df.iterrows():
+        # paper1 = row['S Dos Santos(2010)']
+        e = row['ts0']
+        e = float(e)
+        total+=e
+    
+    e = e/72
+    print("%.5f" % e)
+
 def main():
-    compare()
+    #compare()
+    # sizes = [['10x2','10x5','10x10'],['15x2','15x5','15x10'],['20x2','20x5','20x10']]
+    # (size1,size2) = GetSizes(sizes[0][0])
+    # print(size1)
+    # print(size2)
+    # GetSizes(sizes[0][0])
+    # GetSizes(sizes[0][2])
+    # GetSizes(sizes[1][0])
+    # oneN()
+    average()
+    # comparePenalties()
+    #averageCombination()
 
 if __name__ == '__main__':
     main()
